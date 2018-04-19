@@ -1,0 +1,72 @@
+version: '3'
+services:
+  ccw:
+    image: "naturalis/ccw:0.0.1"
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+     - "8080:80"
+    volumes:
+     - "/data/ccw/www:/var/www/html"
+     - "/data/ccw/data:/data"
+     - "/data/ccw/apachelog:/var/log/apache2"
+    networks:
+      - default
+    labels:
+      - "traefik.backend=ccw"
+      - "traefik.docker.network=web"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - ${CCW_URL_CONFIG:-traefik.frontend.rule=Host:ccw.naturalis.nl}
+  db:
+    image: "mysql"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-blablabla}
+    networks:
+      - default
+    volumes:
+    - "/data/ccw/mysqlconf:/etc/mysql/conf.d"
+    - "/data/ccw/initdb:/docker-entrypoint-initdb.d"
+    - "/data/ccw/mysqllog:/var/log/mysql"
+    - "${BASE_PATH:-/data/ccw/db}:/var/lib/mysql"
+  minio:
+    image: "minio/minio"
+    restart: unless-stopped
+    command: "server /data"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-12345}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-12345678}
+    ports:
+      - "9000:9000"
+    volumes:
+      - "/data/ccw/data:/data"
+      - "/data/ccw/minioconfig:/root/.minio"
+    networks:
+      - default
+    labels:
+      - "traefik.backend=minio"
+      - "traefik.docker.network=web"
+      - "traefik.enable=true"
+      - "traefik.port=9000"
+      - ${MINIO_URL_CONFIG:-traefik.frontend.rule=Host:ccw-storage.naturalis.nl}
+  traefik:
+    image: traefik:1.4.5
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - default
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${TRAEFIK_TOML_FILE:-./traefik.dev.toml}:/traefik.toml
+      - ${ACME_JSON:-./acme.json}:/acme.json
+
+# run docker network create web before
+networks:
+  web:
+    external: true
+
