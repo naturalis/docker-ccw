@@ -10,6 +10,7 @@ services:
     volumes:
      - "/data/ccw/www:/var/www/html"
      - "/data/ccw/data:/data"
+     - "/opt/htpasswd:/opt/htpasswd"
      - "/data/ccw/apachelog:/var/log/apache2"
     networks:
       - default
