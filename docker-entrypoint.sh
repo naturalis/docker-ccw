@@ -23,7 +23,7 @@ ln -s /data/xml /var/www/html/xml
 /bin/sed -i -E "s/htdocs/html/g" /var/www/html/admin/admin_config.inc.php
 
 mkdir -p /data/documents
-mkdir -p /data/html/xml
+mkdir -p /data/xml
 mkdir -p /var/www/html/thumbnails
 mkdir -p /var/www/html/images
 chmod 777 -R /data/documents
