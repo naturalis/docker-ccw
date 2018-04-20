@@ -1,7 +1,7 @@
 #!/bin/bash
 # create symlinks
-ln -s /data/documents /var/www/html/documents
-ln -s /data/xml /var/www/html/xml
+ln -sn /data/documents /var/www/html/documents
+ln -sn /data/xml /var/www/html/xml
 
 
 # copy default configs and modify password based on environment variables

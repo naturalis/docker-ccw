@@ -53,7 +53,7 @@ services:
       - "traefik.port=9000"
       - ${MINIO_URL_CONFIG:-traefik.frontend.rule=Host:ccw-storage.naturalis.nl}
   traefik:
-    image: traefik:1.4.5
+    image: traefik:1.5.3
     restart: always
     ports:
       - 80:80
