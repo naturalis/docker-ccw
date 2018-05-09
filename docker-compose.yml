@@ -21,7 +21,7 @@ services:
       - "traefik.port=80"
       - ${CCW_URL_CONFIG:-traefik.frontend.rule=Host:ccw.naturalis.nl}
   db:
-    image: "mysql"
+    image: "mysql:5"
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-blablabla}
