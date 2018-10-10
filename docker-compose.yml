@@ -7,6 +7,11 @@ services:
       - .env
     ports:
      - "8080:80"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: '10m'
+        max-file: '5'
     volumes:
      - "/data/ccw/www:/var/www/html"
      - "/data/ccw/data:/data"
@@ -25,6 +30,11 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-blablabla}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: '10m'
+        max-file: '5'
     networks:
       - default
     volumes:
@@ -39,6 +49,11 @@ services:
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-12345}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-12345678}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: '10m'
+        max-file: '5'
     ports:
       - "9000:9000"
     volumes:
@@ -55,6 +70,11 @@ services:
   traefik:
     image: traefik:1.5.3
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: '10m'
+        max-file: '5'
     ports:
       - 80:80
       - 443:443
