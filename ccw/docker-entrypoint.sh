@@ -3,6 +3,9 @@
 ln -sn /data/documents /var/www/html/documents
 ln -sn /data/xml /var/www/html/xml
 
+# Create htpasswd and htaccess to secure admin pages
+/usr/bin/htpasswd -b -m /opt/htpasswd/.htpasswd $HTPASSWD_USER $HTPASSWD_PASS
+cp /tmp/htaccess /var/www/html/admin/.htaccess
 
 # copy default configs and modify password based on environment variables
 /bin/sed -i -E "s/host = \".*/host = \"$MYSQL_HOST\";/" /var/www/html/includes/config.inc.php

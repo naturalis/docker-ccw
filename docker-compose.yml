@@ -1,22 +1,25 @@
-version: '3'
+version: '3.4'
+
+x-logging:
+  &default-logging
+  options:
+    max-size: '10m'
+    max-file: '5'
+  driver: json-file
+
 services:
   ccw:
-    image: "naturalis/ccw:0.0.1"
+    image: "naturalis/ccw:0.0.2"
     restart: unless-stopped
     env_file:
       - .env
     ports:
      - "8080:80"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: '10m'
-        max-file: '5'
     volumes:
-     - "/data/ccw/www:/var/www/html"
-     - "/data/ccw/data:/data"
-     - "/opt/htpasswd:/opt/htpasswd"
-     - "/data/ccw/apachelog:/var/log/apache2"
+      - "${BASE_PATH:-/data}/www:/var/www/html"
+      - "${BASE_PATH:-/data}/ccw:/data"
+      - "${BASE_PATH:-/data}/apachelogs:/var/log/apache2"
+    logging: *default-logging
     networks:
       - default
     labels:
@@ -25,23 +28,23 @@ services:
       - "traefik.enable=true"
       - "traefik.port=80"
       - ${CCW_URL_CONFIG:-traefik.frontend.rule=Host:ccw.naturalis.nl}
+
   db:
     image: "mysql:5"
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-blablabla}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: '10m'
-        max-file: '5'
+      MYSQL_DATABASE: ${MYSQL_DB:-ccw}
+      MYSQL_USER: ${MYSQL_USER:-ccw_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blablabla
+    logging: *default-logging
     networks:
       - default
     volumes:
-    - "/data/ccw/mysqlconf:/etc/mysql/conf.d"
-    - "/data/ccw/initdb:/docker-entrypoint-initdb.d"
-    - "/data/ccw/mysqllog:/var/log/mysql"
-    - "${BASE_PATH:-/data/ccw/db}:/var/lib/mysql"
+    - "./mysqlconfig:/etc/mysql/conf.d"
+    - "${BASE_PATH:-/data}/mysqllog:/var/log/mysql"
+    - "${BASE_PATH:-/data}/db:/var/lib/mysql"
+
   minio:
     image: "minio/minio"
     restart: unless-stopped
@@ -49,16 +52,12 @@ services:
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-12345}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-12345678}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: '10m'
-        max-file: '5'
+    logging: *default-logging
     ports:
       - "9000:9000"
-    volumes:
-      - "/data/ccw/data:/data"
-      - "/data/ccw/minioconfig:/root/.minio"
+    volumes: 
+      - "${BASE_PATH:-/data}/miniodata:/data"
+      - "${BASE_PATH:-/data}/minioconfif:/root/.minio"
     networks:
       - default
     labels:
@@ -67,24 +66,22 @@ services:
       - "traefik.enable=true"
       - "traefik.port=9000"
       - ${MINIO_URL_CONFIG:-traefik.frontend.rule=Host:ccw-storage.naturalis.nl}
+
   traefik:
-    image: traefik:1.5.3
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: '10m'
-        max-file: '5'
+    image: traefik:1.7.12
+    restart: unless-stopped
     ports:
       - 80:80
       - 443:443
+      - 8081:8080
     networks:
-      - default
       - web
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${TRAEFIK_TOML_FILE:-./traefik.dev.toml}:/traefik.toml
+      - ${TRAEFIK_TOML_FILE:-./traefik/traefik.toml}:/traefik.toml
+      - ${CERTDIR:-/etc/letsencrypt}:/etc/letsencrypt
+    logging: *default-logging
+
 
 # run docker network create web before
 networks:

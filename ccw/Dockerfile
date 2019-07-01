@@ -23,5 +23,6 @@ RUN docker-php-ext-install mysqli && \
 ADD config/php.ini /usr/local/etc/php/
 ADD docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
+ADD htaccess /tmp/htaccess
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
