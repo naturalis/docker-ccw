@@ -1,4 +1,14 @@
 #!/bin/bash
+# add credentials on build
+mkdir /root/.ssh/
+echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+
+# make sure your domain is accepted
+touch /root/.ssh/known_hosts
+ssh-keyscan github.org >> /root/.ssh/known_hosts
+
+git clone git@github.com:naturalis/ccw.git /var/www/html
+
 # create symlinks
 ln -sn /data/documents /var/www/html/documents
 ln -sn /data/xml /var/www/html/xml

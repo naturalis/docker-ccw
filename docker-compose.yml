@@ -36,7 +36,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-blablabla}
       MYSQL_DATABASE: ${MYSQL_DB:-ccw}
       MYSQL_USER: ${MYSQL_USER:-ccw_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blablabla
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blablabla}
     logging: *default-logging
     networks:
       - default
