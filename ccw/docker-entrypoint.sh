@@ -1,11 +1,12 @@
 #!/bin/bash
-# add credentials on build
+# add credentials on build, Certificate environment variable SSH_PRIVATE_KEY is Base64 encoded!
 mkdir /root/.ssh/
-echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+echo "${SSH_PRIVATE_KEY}" | base64 --decode > /root/.ssh/id_rsa
+chmod 600 /root/.ssh/id_rsa
 
 # make sure your domain is accepted
 touch /root/.ssh/known_hosts
-ssh-keyscan github.org >> /root/.ssh/known_hosts
+ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 git clone git@github.com:naturalis/ccw.git /var/www/html
 
@@ -14,7 +15,8 @@ ln -sn /data/documents /var/www/html/documents
 ln -sn /data/xml /var/www/html/xml
 
 # Create htpasswd and htaccess to secure admin pages
-/usr/bin/htpasswd -b -m /opt/htpasswd/.htpasswd $HTPASSWD_USER $HTPASSWD_PASS
+mkdir /opt/htpasswd
+/usr/bin/htpasswd -c -b -m /opt/htpasswd/.htpasswd $HTPASSWD_USER $HTPASSWD_PASS
 cp /tmp/htaccess /var/www/html/admin/.htaccess
 
 # copy default configs and modify password based on environment variables
