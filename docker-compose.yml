@@ -70,16 +70,21 @@ services:
   traefik:
     image: traefik:1.7.12
     restart: unless-stopped
+    environment: 
+      - TRANSIP_PRIVATE_KEY_PATH=/.transip.key
+      - TRANSIP_ACCOUNT_NAME=${TRANSIP_ACCOUNT_NAME:-naturalis}
     ports:
       - 80:80
       - 443:443
       - 8081:8080
     networks:
       - web
+      - default
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${TRAEFIK_TOML_FILE:-./traefik/traefik.toml}:/traefik.toml
-      - ${CERTDIR:-/etc/letsencrypt}:/etc/letsencrypt
+      - ./.transip.key:/.transip.key
+      - ./acme.json:/acme.json
     logging: *default-logging
 
 
