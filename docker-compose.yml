@@ -23,11 +23,11 @@ services:
     networks:
       - default
     labels:
-      - "traefik.backend=ccw"
-      - "traefik.docker.network=web"
-      - "traefik.enable=true"
-      - "traefik.port=80"
-      - ${CCW_URL_CONFIG:-traefik.frontend.rule=Host:ccw.naturalis.nl}
+      - traefik.enable=${TRAEFIK_ENABLE:-true}
+      - traefik.http.routers.drupal.entrypoints=https
+      - traefik.http.routers.drupal.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-default}
+      - traefik.http.routers.drupal.tls=true
+      - traefik.http.routers.drupal.rule=${CCW_URL_CONFIG:-Host(`ccw.naturalis.nl`)}
 
   db:
     image: "mysql:5"
@@ -61,32 +61,27 @@ services:
     networks:
       - default
     labels:
-      - "traefik.backend=minio"
-      - "traefik.docker.network=web"
-      - "traefik.enable=true"
-      - "traefik.port=9000"
-      - ${MINIO_URL_CONFIG:-traefik.frontend.rule=Host:ccw-storage.naturalis.nl}
+      - traefik.enable=${TRAEFIK_ENABLE:-true}
+      - traefik.http.routers.drupal.entrypoints=https
+      - traefik.http.routers.drupal.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-default}
+      - traefik.http.routers.drupal.tls=true
+      - traefik.http.routers.drupal.rule=${MINIO_URL_CONFIG:-Host(`ccw-storage.naturalis.nl`)}
 
   traefik:
-    image: traefik:1.7.12
+    image: traefik:2.0.1
+    container_name: traefik
     restart: unless-stopped
-    environment: 
-      - TRANSIP_PRIVATE_KEY_PATH=/.transip.key
-      - TRANSIP_ACCOUNT_NAME=${TRANSIP_ACCOUNT_NAME:-naturalis}
     ports:
       - 80:80
       - 443:443
       - 8081:8080
     networks:
-      - web
       - default
+      - web
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${TRAEFIK_TOML_FILE:-./traefik/traefik.toml}:/traefik.toml
-      - ./.transip.key:/.transip.key
-      - ./acme.json:/acme.json
-    logging: *default-logging
-
+      - ./traefik:/etc/traefik
 
 # run docker network create web before
 networks:
